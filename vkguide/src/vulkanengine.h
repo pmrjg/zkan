@@ -6,12 +6,12 @@
 #define VULKANENGINE_H
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <vkbootstrap/VkBootstrap.h>
-#include <vulkan/vulkan.h>
 
 
 class VulkanEngine {
 public:
+    const int WIDTH = 800;
+    const int HEIGHT = 600;
     void run() {
         initWindow();
         initVulkan();
@@ -20,10 +20,13 @@ public:
     }
 
 private:
+    GLFWwindow* window;
+    VkInstance instance;
     void initWindow();
     void initVulkan();
     void mainLoop();
     void cleanup();
+    void createInstance();
 };
 
 
