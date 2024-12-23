@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.30)
+project(ytubetutorial)
+
+set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(GLFW_USE_WAYLAND ON)
+
+find_package(Vulkan REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+find_package(SDL REQUIRED)
+
+find_library(GLFW glfw)
+find_library(IMGUI imgui)
+find_library(GLM glm)
+find_library(PTHREAD pthread)
+
+add_executable(${PROJECT_NAME} main.cpp
+        mve/mve_window.cpp
+        mve/mve_window.h
+        first_app.cpp
+        first_app.h
+        mve/Pipeline.cpp
+        mve/Pipeline.h)
+target_include_directories(${PROJECT_NAME} PRIVATE libs)
+target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE dl)
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan ${GLM} ${IMGUI} ${GLFW} ${PTHREAD} SDL::SDL GPUOpen::VulkanMemoryAllocator)
