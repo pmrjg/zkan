@@ -14,12 +14,18 @@ namespace mve {
         static constexpr int WIDTH = 800;
         static constexpr int HEIGHT = 600;
 
+        FirstApp(){};
+        ~FirstApp(){};
+
+        FirstApp(const FirstApp&) = delete;
+        FirstApp& operator=(const FirstApp&) = delete;
+
         void run();
 
     private:
         MveWindow mveWindow {WIDTH, HEIGHT, "HELLO VULKAN!"};
         MveDevice mveDevice {mveWindow};
-        MvePipeline mvePipeline{mveDevice, "addons/shaders/simple_shader.vert.spv", "addons/shaders/simple_shader.frag.spv", MvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
+        MvePipeline mvePipeline{mveDevice, "./shaders/simple_shader.vert.spv", "./shaders/simple_shader.frag.spv", MvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
     };
 }
 

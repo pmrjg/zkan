@@ -27,7 +27,7 @@ namespace mve {
 
     class MvePipeline {
     public:
-        MvePipeline(MveDevice&, const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+        MvePipeline(MveDevice& device, const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
         ~MvePipeline();
 
         MvePipeline(const MvePipeline&) = delete;

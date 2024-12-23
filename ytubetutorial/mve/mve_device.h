@@ -93,7 +93,7 @@ class MveDevice {
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-  mve::MveWindow &window;
+  MveWindow &window;
   VkCommandPool commandPool;
 
   VkDevice device_;
