@@ -14,10 +14,13 @@ find_package(SDL REQUIRED)
 find_library(GLFW glfw)
 find_library(IMGUI imgui)
 find_library(GLM glm)
+find_library(PTHREAD pthread)
+
 
 add_executable(${PROJECT_NAME} main.cpp
         src/vulkanengine.cpp
         src/vulkanengine.h)
-target_include_directories(${PROJECT_NAME} PUBLIC ext_libs)
+target_include_directories(${PROJECT_NAME} PRIVATE ext_libs)
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan ${GLM} ${IMGUI} ${GLFW} SDL::SDL GPUOpen::VulkanMemoryAllocator)
+target_link_libraries(${PROJECT_NAME} PRIVATE dl)
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan ${GLM} ${IMGUI} ${GLFW} ${PTHREAD} SDL::SDL GPUOpen::VulkanMemoryAllocator)
