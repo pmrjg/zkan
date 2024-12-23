@@ -5,7 +5,7 @@
 #include "mve_Pipeline.h"
 
 #include <iostream>
-
+#include <fstream>
 
 namespace mve {
      MvePipeline::MvePipeline(MveDevice &device, const std::string &vertFilePath, const std::string &fragFilepath,
@@ -54,7 +54,21 @@ namespace mve {
          return configInfo;
      }
 
-     std::vector<char> MvePipeline::readFile(const std::string &filename) {}
+     std::vector<char> MvePipeline::readFile(const std::string &filename) {
+         std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+         if (!file.is_open()) {
+             throw std::runtime_error("Failed to open file " + filename);
+         }
+
+         size_t fileSize = static_cast<size_t>(file.tellg());
+
+         std::vector<char> buffer(fileSize);
+         file.seekg(0);
+         file.read(buffer.data(), fileSize);
+         file.close();
+         return buffer;
+     }
 
     void MvePipeline::createGraphicsPipeline(const std::string &vertFilepath, const std::string &fragFilepath, const PipelineConfigInfo &configInfo) {
          auto vertCode = readFile(vertFilepath);
