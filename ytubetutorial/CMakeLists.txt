@@ -21,8 +21,8 @@ add_executable(${PROJECT_NAME} main.cpp
         mve/mve_window.h
         first_app.cpp
         first_app.h
-        mve/Pipeline.cpp
-        mve/Pipeline.h)
+        mve/mve_Pipeline.cpp
+        mve/mve_Pipeline.h)
 target_include_directories(${PROJECT_NAME} PRIVATE libs)
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE dl)

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "mve/mve_Pipeline.h"
+#include "mve/mve_device.h"
 #include "mve/mve_window.h"
 
 namespace mve {
@@ -16,6 +18,8 @@ namespace mve {
 
     private:
         MveWindow mveWindow {WIDTH, HEIGHT, "HELLO VULKAN!"};
+        MveDevice mveDevice {mveWindow};
+        MvePipeline mvePipeline{mveDevice, "addons/shaders/simple_shader.vert.spv", "addons/shaders/simple_shader.frag.spv", MvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
     };
 }
 
