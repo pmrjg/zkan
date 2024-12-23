@@ -9,12 +9,13 @@ set(GLFW_USE_WAYLAND ON)
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-find_package(SDL REQUIRED)
+find_package(SDL3 REQUIRED)
 
 find_library(GLFW glfw)
 find_library(IMGUI imgui)
 find_library(GLM glm)
 find_library(PTHREAD pthread)
+find_library(SDL3 sdl3)
 
 add_executable(${PROJECT_NAME} main.cpp
         mve/mve_window.cpp
@@ -26,4 +27,4 @@ add_executable(${PROJECT_NAME} main.cpp
 target_include_directories(${PROJECT_NAME} PRIVATE libs)
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE dl)
-target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan ${GLM} ${IMGUI} ${GLFW} ${PTHREAD} SDL::SDL GPUOpen::VulkanMemoryAllocator)
+target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan ${GLM} ${IMGUI} ${GLFW} ${PTHREAD} SDL3::SDL3 GPUOpen::VulkanMemoryAllocator)
