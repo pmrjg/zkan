@@ -9,23 +9,15 @@
 #include <vulkan/vulkan.h>
 #include <volk/volk.h>
 #include <lvk/vulkan/VulkanUtils.h>
+#include <lvk/Pool.h>
+#include <GLFW/glfw3.h>
 
+class General {
+public:
+  static GLFWwindow* setWindow(uint32_t width, uint32_t height) {
+    return nullptr;
+  }
+};
 
-#define VK_ASSERT(func) { \
-  const VkResult vk_assert_result = func; \
-  if (vk_assert_result != VK_SUCCESS) { \
-    LLOGW("Vulkan API call failed: %s: %i\n %s\n %s\n", \
-              __FILE__, __LINE__, #func, ivkGetVulkanResultString(vk_assert_result)); \
-    assert(false); \
-    } \
-}
-
-#define VK_ASSERT_RETURN(func) { \
-  const VkResult vk_assert_result = func; \
-  if (vk_assert_result != VK_SUCCESS) { \
-    LLOGW("Vulkan API call failed: %s:%i\n %s\n %s\n", \
-        __FILE__, __LINE__, #func, ivkGetVulkanResultString(vk_assert_result));\
-  }\
-}
 
 #endif //DEF_H
