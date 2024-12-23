@@ -5,7 +5,10 @@
 #ifndef DEF_H
 #define DEF_H
 
+#define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
+#include <volk/volk.h>
+#include <lvk/vulkan/VulkanUtils.h>
 
 
 #define VK_ASSERT(func) { \
