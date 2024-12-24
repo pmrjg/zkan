@@ -19,10 +19,14 @@ namespace mve {
 
         [[nodiscard]] bool shouldClose() const;
 
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) const;
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+
+        VkExtent2D getExtent() const;
+
+        GLFWwindow* getSurface();
 
     private:
-        [[nodiscard]] GLFWwindow* initWindow() const;
+        void initWindow();
 
         GLFWwindow* window;
         std::pmr::string windowName;

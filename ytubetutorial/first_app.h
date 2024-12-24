@@ -7,6 +7,10 @@
 #include "mve/mve_Pipeline.h"
 #include "mve/mve_device.h"
 #include "mve/mve_window.h"
+#include "mve/mve_swap_chain.h"
+
+#include <memory>
+#include <vector>
 
 namespace mve {
     class FirstApp {
@@ -14,8 +18,8 @@ namespace mve {
         static constexpr int WIDTH = 800;
         static constexpr int HEIGHT = 600;
 
-        FirstApp(){};
-        ~FirstApp(){};
+        FirstApp();
+        ~FirstApp();
 
         FirstApp(const FirstApp&) = delete;
         FirstApp& operator=(const FirstApp&) = delete;
@@ -23,9 +27,18 @@ namespace mve {
         void run();
 
     private:
+        void createPipelineLayout();
+        void createPipeline();
+        void createCommandBuffers();
+        void drawFrame();
+
+
         MveWindow mveWindow {WIDTH, HEIGHT, "HELLO VULKAN!"};
         MveDevice mveDevice {mveWindow};
-        MvePipeline mvePipeline{mveDevice, "./shaders/simple_shader.vert.spv", "./shaders/simple_shader.frag.spv", MvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
+        MveSwapChain mveSwapChain {mveDevice, mveWindow.getExtent()};
+        std::unique_ptr<MvePipeline> mvePipeline;
+        VkPipelineLayout pipelineLayout;
+        std::vector<VkCommandBuffer> commandBuffers;
     };
 }
 

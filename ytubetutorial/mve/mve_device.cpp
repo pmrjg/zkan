@@ -1,10 +1,13 @@
 #include "mve_device.h"
-
 // std headers
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <unordered_set>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_wayland.h>
 
 namespace mve {
 
@@ -193,7 +196,19 @@ void MveDevice::createCommandPool() {
   }
 }
 
-void MveDevice::createSurface() { window.createWindowSurface(instance, &surface_); }
+void MveDevice::createSurface() { //window.createWindowSurface(instance, &surface_);
+
+
+    VkWaylandSurfaceCreateInfoKHR pCreateInfo{};
+    pCreateInfo.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+    pCreateInfo.pNext = nullptr;
+    pCreateInfo.flags = 0;
+    pCreateInfo.display = glfwGetWaylandDisplay();
+    pCreateInfo.surface = glfwGetWaylandWindow(window.getSurface());
+
+
+    VkResult result = vkCreateWaylandSurfaceKHR(instance, &pCreateInfo, nullptr, &surface_);
+}
 
 bool MveDevice::isDeviceSuitable(VkPhysicalDevice device) {
   QueueFamilyIndices indices = findQueueFamilies(device);

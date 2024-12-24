@@ -14,7 +14,6 @@ namespace mve {
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkViewport viewport;
         VkRect2D scissor;
-        VkPipelineViewportStateCreateInfo viewportInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo multisampleInfo;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
@@ -32,6 +31,8 @@ namespace mve {
 
         MvePipeline(const MvePipeline&) = delete;
         MvePipeline& operator=(const MvePipeline&) = delete;
+
+        void bind(VkCommandBuffer commandBuffer);
 
         static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
     private:

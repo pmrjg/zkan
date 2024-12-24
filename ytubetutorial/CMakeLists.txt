@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(GLFW_USE_WAYLAND ON)
+set(USE_WAYLAND_WSI ON)
 
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
