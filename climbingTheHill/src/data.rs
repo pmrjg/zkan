@@ -17,7 +17,9 @@ pub struct EngineData{
     window: Arc<Window>,
     surface: Arc<Surface>,
     physical_device: Arc<PhysicalDevice>,
-    queue_family_index: u32,
+    queue_family_index: Arc<u32>,
+    logical_device: Arc<Device>,
+    queues: Vec<Arc<Queue>>,
 }
 impl EngineData {
     pub fn new() -> Self {
@@ -28,13 +30,22 @@ impl EngineData {
         #[allow(deprecated)]
         let window =  Arc::new(event_loop.create_window(Window::default_attributes()).unwrap());
         let surface = Surface::from_window(vk_instance.clone(), window.clone()).unwrap();
-        
+
         let physical_device = Self::pick_physical_device(&devices,  surface.clone());
-        
+
         let queue_family_index = Self::get_device_queue_index(&physical_device) as u32;
-        
-        
-        Self {vk_library, vk_instance, event_loop, window, surface, physical_device, queue_family_index}
+
+        let (logical_device, queues) = Self::create_logical_device(physical_device.clone(), &queue_family_index);
+
+        Self {vk_library, 
+            vk_instance, 
+            event_loop, window, 
+            surface, 
+            physical_device, 
+            queue_family_index: Arc::new(queue_family_index),
+            logical_device,
+            queues,
+        }
     }
 
     fn get_vk_library() -> Arc<VulkanLibrary> {
@@ -52,7 +63,7 @@ impl EngineData {
         let x = instance.enumerate_physical_devices().expect("failed to enumerate physical devices");
         Vec::from_iter(x)
     }
-    
+
     fn get_device_queue_index(physical_device: &PhysicalDevice) -> usize {
         physical_device.queue_family_properties()
             .iter().enumerate()
@@ -61,7 +72,7 @@ impl EngineData {
             })
             .expect("no such queue family")
     }
-    
+
     fn pick_physical_device(devices: &Vec<Arc<PhysicalDevice>>, surface: Arc<Surface>) -> Arc<PhysicalDevice> {
         let device_extensions = DeviceExtensions {
             khr_swapchain: true,
@@ -86,20 +97,20 @@ impl EngineData {
             }
         }).expect("No suitable physical device found").0.clone()
     }
-    
-    fn create_logical_device(physical_device: Arc<PhysicalDevice>, index: u32)->Arc<(Arc<Device>, Arc<Vec<Arc<Queue>>>)>{
-        let (device, mut queues) = Device::new(
+
+    fn create_logical_device(physical_device: Arc<PhysicalDevice>, index: &u32) -> (Arc<Device>, Vec<Arc<Queue>>) {
+        let (device, queues) = Device::new(
             physical_device, DeviceCreateInfo {
                 queue_create_infos: vec![QueueCreateInfo{
-                    queue_family_index: index, ..Default::default()
+                    queue_family_index: *index, ..Default::default()
                 }],
                 ..Default::default()
             }
         ).expect("failed to create device");
-        
+
         let ts = queues.into_iter().collect::<Vec<_>>();
 
-        Arc::new((device, Arc::new(ts)))
+        (device, ts)
 
     }
 }
