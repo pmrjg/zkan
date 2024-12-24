@@ -28,6 +28,8 @@ add_executable(${PROJECT_NAME} main.cpp
         mve/mve_Pipeline.h
         mve/mve_device.cpp
         mve/mve_device.h
+        mve/mve_swap_chain.cpp
+        mve/mve_swap_chain.h
 )
 target_include_directories(${PROJECT_NAME} PRIVATE libs)
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
