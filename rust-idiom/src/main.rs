@@ -15,6 +15,7 @@ use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{Window, WindowBuilder};
 
 use std::sync::Arc;
+use vulkano::format::ClearValue;
 
 fn main() {
     let instance = {
@@ -105,4 +106,154 @@ fn main() {
             }
         ).unwrap()
     };
+    
+    // Allocators
+    let command_buffer_allocator = StandardCommandBufferAllocator::new(device.clone(), Default::default());
+    
+    // Shaders
+    
+    // Renderpass
+    let render_pass = vulkano::single_pass_renderpass!(device.clone(), attachments: {
+        color: {
+            load: Clear,
+            store: Store,
+            format: swapchain.image_format(),
+            samples: 1,
+        }
+    },
+    pass: {
+            color: [color],
+            depth_stencil: {}
+        }).unwrap();
+    
+    //Graphics Pipeline
+    let mut viewport = Viewport {
+        origin: [0.0, 0.0],
+        dimensions: [0.0, 0.0],
+        depth_range: 0.0..1.0,
+    };
+    
+    // FRamebuffers
+    let mut framebuffers = window_size_dependent_setup(&images, render_pass.clone(), &mut viewport);
+    
+    let mut recreate_swapchain = false;
+    let mut previous_frame_end = Some(Box::new(sync::now(device.clone())) as Box<dyn GpuFuture>);
+    
+    
+    event_loop.run(move |event, _, control_flow| {
+        previous_frame_end
+            .as_mut()
+            .take()
+            .unwrap()
+            .cleanup_finished();
+        match event {
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested, ..
+            } => {*control_flow = ControlFlow::Exit;},
+            Event::WindowEvent {event: WindowEvent::Resized(_), ..} => {recreate_swapchain = true;}, 
+            Event::RedrawEventsCleared => {
+
+                if recreate_swapchain {
+                    let window = surface.object().unwrap().downcast_ref::<Window>().unwrap();
+                    let image_extent: [u32; 2] = window.inner_size().into();
+
+                    let (new_swapchain, new_images) = match swapchain.recreate(SwapchainCreateInfo {
+                        image_extent,
+                        ..swapchain.create_info()
+                    }) {
+                        Ok(r) => r,
+                        Err(SwapchainCreationError::ImageExtentNotSupported { .. }) => return,
+                        Err(e) => panic!("Failed to recreate swapchain: {:?}", e),
+                    };
+
+                    swapchain = new_swapchain;
+                    framebuffers =
+                        window_size_dependent_setup(&new_images, render_pass.clone(), &mut viewport);
+                    recreate_swapchain = false;
+                }
+
+                let (image_index, suboptimal, acquire_future) =
+                    match swapchain::acquire_next_image(swapchain.clone(), None) {
+                        Ok(r) => r,
+                        Err(AcquireError::OutOfDate) => {
+                            recreate_swapchain = true;
+                            return;
+                        }
+                        Err(e) => panic!("Failed to acquire next image: {:?}", e),
+                    };
+
+                if suboptimal {
+                    recreate_swapchain = true;
+                }
+                
+                let clear_values:Vec<Option<ClearValue>> = vec![Some([0.0, 0.68, 1.0, 1.0].into())];
+                // Command Buffers
+                let mut cmd_buffer_builder = AutoCommandBufferBuilder::primary(
+                    &command_buffer_allocator,
+                    queue.queue_family_index(),
+                    CommandBufferUsage::OneTimeSubmit,
+                )
+                    .unwrap();
+
+                cmd_buffer_builder
+                    .begin_render_pass(
+                        RenderPassBeginInfo {
+                            clear_values,
+                            ..RenderPassBeginInfo::framebuffer(
+                                framebuffers[image_index as usize].clone(),
+                            )
+                        },
+                        SubpassContents::Inline,
+                    )
+                    .unwrap()
+                    .end_render_pass()
+                    .unwrap();
+
+                let command_buffer = cmd_buffer_builder.build().unwrap();
+
+                let future = previous_frame_end
+                    .take()
+                    .unwrap()
+                    .join(acquire_future)
+                    .then_execute(queue.clone(), command_buffer)
+                    .unwrap()
+                    .then_swapchain_present(
+                        queue.clone(),
+                        SwapchainPresentInfo::swapchain_image_index(swapchain.clone(), image_index),
+                    )
+                    .then_signal_fence_and_flush();
+
+                match future {
+                    Ok(future) => {
+                        previous_frame_end = Some(Box::new(future) as Box<_>);
+                    }
+                    Err(FlushError::OutOfDate) => {
+                        recreate_swapchain = true;
+                        previous_frame_end = Some(Box::new(sync::now(device.clone())) as Box<_>);
+                    }
+                    Err(e) => {
+                        println!("Failed to flush future: {:?}", e);
+                        previous_frame_end = Some(Box::new(sync::now(device.clone())) as Box<_>);
+                    }
+                }
+            },
+            _ => {}
+        }
+    });
+}
+
+fn window_size_dependent_setup(images: &[Arc<SwapchainImage>], render_pass: Arc<RenderPass>, viewport: &mut Viewport) -> Vec<Arc<Framebuffer>> {
+    let dimensions = images[0].dimensions().width_height();
+    viewport.dimensions = [dimensions[0] as f32, dimensions[1] as f32];
+    
+    images.iter().map(|image| {
+        let view = ImageView::new_default(image.clone()).unwrap();
+        
+        Framebuffer::new(
+            render_pass.clone(),
+            FramebufferCreateInfo {
+                attachments: vec![view],
+                ..Default::default()
+            },).unwrap()
+    }).collect::<Vec<_>>()
 }
