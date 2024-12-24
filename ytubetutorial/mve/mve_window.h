@@ -21,8 +21,6 @@ namespace mve {
 
         void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface) const;
 
-        void update();
-
     private:
         [[nodiscard]] GLFWwindow* initWindow() const;
 

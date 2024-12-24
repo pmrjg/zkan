@@ -32,8 +32,5 @@ namespace mve {
             throw std::runtime_error("failed to create window surface");
         }
     }
-    void MveWindow::update() {
-        glfwSwapBuffers(window);
-    }
 
 } // namespace mve

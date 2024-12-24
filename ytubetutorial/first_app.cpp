@@ -8,7 +8,6 @@ namespace mve {
     void FirstApp::run() {
         while (!mveWindow.shouldClose()) {
             glfwPollEvents();
-            mveWindow.update();
         }
     }
 }
