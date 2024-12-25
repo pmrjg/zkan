@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use vulkano::instance::{Instance, InstanceCreateFlags, InstanceCreateInfo};
+use vulkano::instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions};
 use vulkano::VulkanLibrary;
 use pub_fields::pub_fields;
 use vulkano::device::{Device, DeviceCreateInfo, DeviceExtensions, Queue, QueueCreateInfo, QueueFlags};
@@ -9,7 +9,10 @@ use winit::window::Window;
 use winit::event_loop::EventLoop;
 
 use vulkano::memory::allocator::{StandardMemoryAllocator, AllocationCreateInfo, MemoryTypeFilter};
+use vulkano::command_buffer::allocator::{StandardCommandBufferAllocator, StandardCommandBufferAllocatorCreateInfo};
+use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo, PrimaryAutoCommandBuffer, SecondaryAutoCommandBuffer};
 use vulkano::buffer::{Buffer, BufferContents, BufferCreateInfo, BufferUsage, Subbuffer};
+
 
 #[pub_fields]
 pub struct EngineComputing{
@@ -23,13 +26,22 @@ pub struct EngineComputing{
     logical_device: Arc<Device>,
     queue: Arc<Queue>,
     memory_allocator: Arc<StandardMemoryAllocator>,
+    command_buffer_allocator: Arc<StandardCommandBufferAllocator>,
+    command_buffer: Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>>,
+    src: Arc<Subbuffer<[i32]>>,
+    dst: Arc<Subbuffer<[i32]>>,
+    
 }
 impl EngineComputing {
     pub fn new() -> Self {
         let vk_library = Self::get_vk_library();
-        let vk_instance = Self::get_vk_instance(vk_library.clone());
-        let devices = Self::get_vk_physical_devices(vk_instance.clone());
         let event_loop = Arc::new(EventLoop::new().unwrap());
+        let extensions = Surface::required_extensions(&event_loop);
+        let vk_instance = Self::get_vk_instance(vk_library.clone(), &extensions);
+        let devices = Self::get_vk_physical_devices(vk_instance.clone());
+        
+        
+        
         #[allow(deprecated)]
         let window =  Arc::new(event_loop.create_window(Window::default_attributes()).unwrap());
         let surface = Surface::from_window(vk_instance.clone(), window.clone()).unwrap();
@@ -40,20 +52,35 @@ impl EngineComputing {
 
         let (logical_device, mut queues) = Self::create_logical_device(physical_device.clone(), &queue_family_index);
 
-        
-        let queue = queues.next().unwrap();
-        
-        let memory_allocator = Arc::new(StandardMemoryAllocator::new_default(logical_device.clone()));
 
-        Self {vk_library, 
-            vk_instance, 
-            event_loop, window, 
-            surface, 
-            physical_device, 
+        let queue = queues.next().unwrap();
+
+        let memory_allocator = Arc::new(StandardMemoryAllocator::new_default(logical_device.clone()));
+        
+        let command_buffer_allocator = Arc::new(StandardCommandBufferAllocator::new(logical_device.clone(), StandardCommandBufferAllocatorCreateInfo::default()));
+        
+        let cmp_f = |mm_a: Arc<StandardMemoryAllocator>, cls: Vec<i32>, usage| {
+            Buffer::from_iter(mm_a, BufferCreateInfo {usage, ..Default::default()}, AllocationCreateInfo{ memory_type_filter: MemoryTypeFilter::PREFER_HOST | MemoryTypeFilter::HOST_SEQUENTIAL_WRITE, ..Default::default()}, cls).expect("failed to create buffer")
+        };
+        
+        let source = cmp_f(memory_allocator.clone(), (0..64).collect(), BufferUsage::TRANSFER_SRC);
+        let destination_content = cmp_f(memory_allocator.clone(), (0..64).map(|_| 0).collect(), BufferUsage::TRANSFER_DST);
+        
+        let command_buffer = Self::build_command_buffer(command_buffer_allocator.clone(), &queue_family_index, &source, &destination_content);
+
+        Self {vk_library,
+            vk_instance,
+            event_loop, window,
+            surface,
+            physical_device,
             queue_family_index: Arc::new(queue_family_index),
             logical_device,
             queue,
             memory_allocator,
+            command_buffer_allocator,
+            command_buffer,
+            src: Arc::new(source),
+            dst: Arc::new(destination_content),
         }
     }
 
@@ -61,9 +88,10 @@ impl EngineComputing {
         VulkanLibrary::new().expect("no local vulkan library/dll")
     }
 
-    fn get_vk_instance(library: Arc<VulkanLibrary>) -> Arc<Instance> {
+    fn get_vk_instance(library: Arc<VulkanLibrary>, extensions: &InstanceExtensions) -> Arc<Instance> {
         Instance::new(library, InstanceCreateInfo {
             flags: InstanceCreateFlags::ENUMERATE_PORTABILITY,
+            enabled_extensions: *extensions,
             ..Default::default()
         }).expect("failed to create instance")
     }
@@ -120,7 +148,14 @@ impl EngineComputing {
         (device, queues)
 
     }
-    
+
+    fn build_command_buffer(command_buffer_Allocator: Arc<StandardCommandBufferAllocator>, index: &u32, src: &Subbuffer<[i32]>, dst: &Subbuffer<[i32]>) -> Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>> {
+        let mut builder = AutoCommandBufferBuilder::primary(&command_buffer_Allocator, *index, CommandBufferUsage::OneTimeSubmit).unwrap();
+        
+        builder.copy_buffer(CopyBufferInfo::buffers(src.clone(), dst.clone()));
+        builder.build().unwrap()
+    }
+
     pub fn create_buffer<T>(&self, data: T)-> Subbuffer<T> where T:BufferContents, T:Clone {
         Buffer::from_data(
             self.memory_allocator.clone(),
