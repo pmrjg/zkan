@@ -1,4 +1,5 @@
 use std::ops::Range;
+use vulkano::buffer::{Buffer, BufferCreateInfo, BufferUsage};
 use vulkano::descriptor_set::allocator::StandardDescriptorSetAllocator;
 use vulkano::descriptor_set::{PersistentDescriptorSet, WriteDescriptorSet};
 use vulkano::pipeline::{ComputePipeline, Pipeline, PipelineLayout, PipelineShaderStageCreateInfo};
@@ -8,8 +9,13 @@ use vulkano::sync::{self, GpuFuture};
 use vulkano::command_buffer::allocator::{StandardCommandBufferAllocator, StandardCommandBufferAllocatorCreateInfo};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage};
 use vulkano::pipeline::PipelineBindPoint;
-
-
+use vulkano::image::{Image, ImageCreateInfo, ImageType, ImageUsage};
+use vulkano::format::Format;
+use vulkano::memory::allocator::{AllocationCreateInfo, MemoryTypeFilter};
+use vulkano::command_buffer::ClearColorImageInfo;
+use vulkano::format::ClearColorValue;
+use vulkano::command_buffer::CopyImageToBufferInfo;
+use image::{ImageBuffer, Rgba};
 
 use crate::e_computing::EngineComputing;
 mod e_computing;
@@ -92,5 +98,61 @@ fn main() {
     }
     
     println!("Computing 65536 values on GPU succeeded");
+
+    let image = Image::new(
+        memory_allocator.clone(),
+        ImageCreateInfo {
+            image_type: ImageType::Dim2d,
+            format: Format::R8G8B8A8_UNORM,
+            extent: [1024, 1024, 1],
+            usage: ImageUsage::TRANSFER_DST | ImageUsage::TRANSFER_SRC,
+            ..Default::default()
+        },
+        AllocationCreateInfo {
+            memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
+            ..Default::default()
+        },
+    )
+        .unwrap();
+
+    let mut builder = AutoCommandBufferBuilder::primary(
+        &command_buffer_allocator,
+        queue.queue_family_index(),
+        CommandBufferUsage::OneTimeSubmit,
+    )
+        .unwrap();
+
+    let buf = Buffer::from_iter(
+        memory_allocator.clone(),
+        BufferCreateInfo {
+            usage: BufferUsage::TRANSFER_DST,
+            ..Default::default()
+        },
+        AllocationCreateInfo {
+            memory_type_filter: MemoryTypeFilter::PREFER_HOST
+                | MemoryTypeFilter::HOST_RANDOM_ACCESS,
+            ..Default::default()
+        },
+        (0..1024 * 1024 * 4).map(|_| 0u8),
+    )
+        .expect("failed to create buffer");
+
+    builder
+        .clear_color_image(ClearColorImageInfo {
+            clear_value: ClearColorValue::Float([0.0, 0.0, 1.0, 1.0]),
+            ..ClearColorImageInfo::image(image.clone())
+        })
+        .unwrap().copy_image_to_buffer(CopyImageToBufferInfo::image_buffer(image.clone(), buf.clone())).unwrap();;
+
+    let command_buffer = builder.build().unwrap();
     
+    let future = sync::now(logical_device.clone()).then_execute(queue.clone(), command_buffer).unwrap().then_signal_fence_and_flush().unwrap();
+    
+    future.wait(None).unwrap();
+    
+    let buffer_content = buf.read().unwrap();
+    let image = ImageBuffer::<Rgba<u8>, _>::from_raw(1024, 1024, &buffer_content[..]).unwrap();
+    
+    image.save("image.png").unwrap();
+    println!("Printing image succeeded!");
 }
