@@ -28,8 +28,10 @@ pub struct EngineComputing{
     memory_allocator: Arc<StandardMemoryAllocator>,
     command_buffer_allocator: Arc<StandardCommandBufferAllocator>,
     command_buffer: Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>>,
-    src: Arc<Subbuffer<[i32]>>,
-    dst: Arc<Subbuffer<[i32]>>,
+    src: Arc<Subbuffer<[u32]>>,
+    dst: Arc<Subbuffer<[u32]>>,
+    data_buffer: Arc<Subbuffer<[u32]>>,
+    db: Subbuffer<[u32]>,
     
 }
 impl EngineComputing {
@@ -59,12 +61,13 @@ impl EngineComputing {
         
         let command_buffer_allocator = Arc::new(StandardCommandBufferAllocator::new(logical_device.clone(), StandardCommandBufferAllocatorCreateInfo::default()));
         
-        let cmp_f = |mm_a: Arc<StandardMemoryAllocator>, cls: Vec<i32>, usage| {
+        let cmp_f = |mm_a: Arc<StandardMemoryAllocator>, cls: Vec<u32>, usage| {
             Buffer::from_iter(mm_a, BufferCreateInfo {usage, ..Default::default()}, AllocationCreateInfo{ memory_type_filter: MemoryTypeFilter::PREFER_HOST | MemoryTypeFilter::HOST_SEQUENTIAL_WRITE, ..Default::default()}, cls).expect("failed to create buffer")
         };
         
         let source = cmp_f(memory_allocator.clone(), (0..64).collect(), BufferUsage::TRANSFER_SRC);
         let destination_content = cmp_f(memory_allocator.clone(), (0..64).map(|_| 0).collect(), BufferUsage::TRANSFER_DST);
+        let data_buffer = cmp_f(memory_allocator.clone(), (0..65536u32).collect(), BufferUsage::STORAGE_BUFFER);
         
         let command_buffer = Self::build_command_buffer(command_buffer_allocator.clone(), &queue_family_index, &source, &destination_content);
 
@@ -81,6 +84,8 @@ impl EngineComputing {
             command_buffer,
             src: Arc::new(source),
             dst: Arc::new(destination_content),
+            data_buffer: Arc::new(data_buffer.clone()),
+            db: data_buffer,
         }
     }
 
@@ -149,7 +154,7 @@ impl EngineComputing {
 
     }
 
-    fn build_command_buffer(command_buffer_Allocator: Arc<StandardCommandBufferAllocator>, index: &u32, src: &Subbuffer<[i32]>, dst: &Subbuffer<[i32]>) -> Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>> {
+    fn build_command_buffer(command_buffer_Allocator: Arc<StandardCommandBufferAllocator>, index: &u32, src: &Subbuffer<[u32]>, dst: &Subbuffer<[u32]>) -> Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>> {
         let mut builder = AutoCommandBufferBuilder::primary(&command_buffer_Allocator, *index, CommandBufferUsage::OneTimeSubmit).unwrap();
         
         builder.copy_buffer(CopyBufferInfo::buffers(src.clone(), dst.clone()));
