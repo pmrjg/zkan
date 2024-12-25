@@ -1,4 +1,3 @@
-use std::ops::Deref;
 use std::sync::Arc;
 use vulkano::instance::{Instance, InstanceCreateFlags, InstanceCreateInfo};
 use vulkano::VulkanLibrary;
@@ -9,8 +8,11 @@ use vulkano::swapchain::Surface;
 use winit::window::Window;
 use winit::event_loop::EventLoop;
 
+use vulkano::memory::allocator::{StandardMemoryAllocator, AllocationCreateInfo, MemoryTypeFilter};
+use vulkano::buffer::{Buffer, BufferContents, BufferCreateInfo, BufferUsage, Subbuffer};
+
 #[pub_fields]
-pub struct EngineData{
+pub struct EngineComputing{
     vk_library: Arc<VulkanLibrary>,
     vk_instance: Arc<Instance>,
     event_loop: Arc<EventLoop<()>>,
@@ -19,9 +21,10 @@ pub struct EngineData{
     physical_device: Arc<PhysicalDevice>,
     queue_family_index: Arc<u32>,
     logical_device: Arc<Device>,
-    queues: Vec<Arc<Queue>>,
+    queue: Arc<Queue>,
+    memory_allocator: Arc<StandardMemoryAllocator>,
 }
-impl EngineData {
+impl EngineComputing {
     pub fn new() -> Self {
         let vk_library = Self::get_vk_library();
         let vk_instance = Self::get_vk_instance(vk_library.clone());
@@ -35,7 +38,12 @@ impl EngineData {
 
         let queue_family_index = Self::get_device_queue_index(&physical_device) as u32;
 
-        let (logical_device, queues) = Self::create_logical_device(physical_device.clone(), &queue_family_index);
+        let (logical_device, mut queues) = Self::create_logical_device(physical_device.clone(), &queue_family_index);
+
+        
+        let queue = queues.next().unwrap();
+        
+        let memory_allocator = Arc::new(StandardMemoryAllocator::new_default(logical_device.clone()));
 
         Self {vk_library, 
             vk_instance, 
@@ -44,7 +52,8 @@ impl EngineData {
             physical_device, 
             queue_family_index: Arc::new(queue_family_index),
             logical_device,
-            queues,
+            queue,
+            memory_allocator,
         }
     }
 
@@ -98,7 +107,7 @@ impl EngineData {
         }).expect("No suitable physical device found").0.clone()
     }
 
-    fn create_logical_device(physical_device: Arc<PhysicalDevice>, index: &u32) -> (Arc<Device>, Vec<Arc<Queue>>) {
+    fn create_logical_device(physical_device: Arc<PhysicalDevice>, index: &u32) -> (Arc<Device>, impl ExactSizeIterator<Item=Arc<Queue>> + Sized) {
         let (device, queues) = Device::new(
             physical_device, DeviceCreateInfo {
                 queue_create_infos: vec![QueueCreateInfo{
@@ -108,9 +117,21 @@ impl EngineData {
             }
         ).expect("failed to create device");
 
-        let ts = queues.into_iter().collect::<Vec<_>>();
+        (device, queues)
 
-        (device, ts)
-
+    }
+    
+    pub fn create_buffer<T>(&self, data: T)-> Subbuffer<T> where T:BufferContents, T:Clone {
+        Buffer::from_data(
+            self.memory_allocator.clone(),
+            BufferCreateInfo {
+                usage: BufferUsage::UNIFORM_BUFFER,
+                ..Default::default()
+            },
+            AllocationCreateInfo {
+                memory_type_filter: MemoryTypeFilter::PREFER_DEVICE | MemoryTypeFilter::HOST_SEQUENTIAL_WRITE, ..Default::default()
+            },
+            data
+        ).unwrap()
     }
 }
