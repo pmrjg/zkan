@@ -1,12 +1,12 @@
 use std::sync::Arc;
 use pub_fields::pub_fields;
-use vulkano::device::{Device, DeviceExtensions, QueueFlags};
+use vulkano::device::{Device, DeviceCreateInfo, DeviceExtensions, Queue, QueueCreateInfo, QueueFlags};
 use vulkano::device::physical::{PhysicalDevice, PhysicalDeviceType};
 use vulkano::instance::{Instance, InstanceCreateFlags, InstanceCreateInfo};
-use vulkano::swapchain::{Surface, SurfaceInfo};
+use vulkano::swapchain::{Surface};
 use vulkano::VulkanLibrary;
 use winit::event_loop::EventLoop;
-use winit::window::{Window, WindowAttributes};
+use winit::window::{Window};
 
 #[pub_fields]
 struct VkInit {
@@ -15,6 +15,10 @@ struct VkInit {
     physical_device: Arc<PhysicalDevice>,
     window: Arc<Window>,
     surface: Arc<Surface>,
+    event_loop: Arc<EventLoop<()>>,
+    logical_device: Arc<Device>,
+    queue_index: Arc<u32>,
+    queue: Arc<Queue>,
 }
 
 impl VkInit {
@@ -31,6 +35,7 @@ impl VkInit {
 
         let wa = Window::default_attributes();
 
+        #[allow(deprecated)]
         let window = Arc::new(event_loop.create_window(wa).unwrap());
 
         let surface = Surface::from_window(instance.clone(), window.clone()).unwrap();
@@ -41,8 +46,13 @@ impl VkInit {
         };
 
         let physical_device = Self::pick_physical_device(instance.clone(), &device_extensions, surface.clone());
+        
+        let queue_index = Self::get_device_queue_index(&physical_device);
+        let (logical_device, mut queues) = Self::logical_device_and_queues(physical_device.clone(), &queue_index);
+        
+        let queue = queues.next().expect("Failed to get queue");
 
-        Self {library: l, instance, physical_device, window, surface}
+        Self {library: l, instance, physical_device, window, surface, event_loop: Arc::new(event_loop), logical_device, queue_index: Arc::new(queue_index), queue}
     }
 
     fn pick_physical_device(instance: Arc<Instance>, device_extensions: &DeviceExtensions, surface: Arc<Surface>) -> Arc<PhysicalDevice>{
@@ -68,5 +78,25 @@ impl VkInit {
             }
         }).expect("No suitable physical device found").0.clone()
 
+    }
+
+    fn get_device_queue_index(physical_device: &PhysicalDevice) -> u32 {
+        physical_device.queue_family_properties()
+            .iter().enumerate()
+            .position(|(_qf_idx, qf_props)| {
+                qf_props.queue_flags.contains(QueueFlags::GRAPHICS | QueueFlags::COMPUTE)
+            })
+            .expect("no such queue family") as u32
+    }
+    
+    fn logical_device_and_queues(physical_device: Arc<PhysicalDevice>, index: &u32) -> (Arc<Device>, impl ExactSizeIterator<Item=Arc<Queue>> + Sized) {
+        Device::new(
+            physical_device, DeviceCreateInfo {
+                queue_create_infos: vec![QueueCreateInfo{
+                    queue_family_index: *index, ..Default::default()
+                }],
+                ..Default::default()
+            }
+        ).expect("failed to create device")
     }
 }
