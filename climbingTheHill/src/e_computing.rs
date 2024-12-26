@@ -1,3 +1,4 @@
+
 use std::sync::Arc;
 use vulkano::instance::{Instance, InstanceCreateFlags, InstanceCreateInfo, InstanceExtensions};
 use vulkano::VulkanLibrary;
@@ -12,7 +13,6 @@ use vulkano::memory::allocator::{StandardMemoryAllocator, AllocationCreateInfo, 
 use vulkano::command_buffer::allocator::{StandardCommandBufferAllocator, StandardCommandBufferAllocatorCreateInfo};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo, PrimaryAutoCommandBuffer, SecondaryAutoCommandBuffer};
 use vulkano::buffer::{Buffer, BufferContents, BufferCreateInfo, BufferUsage, Subbuffer};
-
 
 #[pub_fields]
 pub struct EngineComputing{
@@ -32,7 +32,7 @@ pub struct EngineComputing{
     dst: Arc<Subbuffer<[u32]>>,
     data_buffer: Arc<Subbuffer<[u32]>>,
     db: Subbuffer<[u32]>,
-    
+
 }
 impl EngineComputing {
     pub fn new() -> Self {
@@ -41,9 +41,9 @@ impl EngineComputing {
         let extensions = Surface::required_extensions(&event_loop);
         let vk_instance = Self::get_vk_instance(vk_library.clone(), &extensions);
         let devices = Self::get_vk_physical_devices(vk_instance.clone());
-        
-        
-        
+
+
+
         #[allow(deprecated)]
         let window =  Arc::new(event_loop.create_window(Window::default_attributes()).unwrap());
         let surface = Surface::from_window(vk_instance.clone(), window.clone()).unwrap();
@@ -58,17 +58,17 @@ impl EngineComputing {
         let queue = queues.next().unwrap();
 
         let memory_allocator = Arc::new(StandardMemoryAllocator::new_default(logical_device.clone()));
-        
+
         let command_buffer_allocator = Arc::new(StandardCommandBufferAllocator::new(logical_device.clone(), StandardCommandBufferAllocatorCreateInfo::default()));
-        
+
         let cmp_f = |mm_a: Arc<StandardMemoryAllocator>, cls: Vec<u32>, usage| {
             Buffer::from_iter(mm_a, BufferCreateInfo {usage, ..Default::default()}, AllocationCreateInfo{ memory_type_filter: MemoryTypeFilter::PREFER_HOST | MemoryTypeFilter::HOST_SEQUENTIAL_WRITE, ..Default::default()}, cls).expect("failed to create buffer")
         };
-        
+
         let source = cmp_f(memory_allocator.clone(), (0..64).collect(), BufferUsage::TRANSFER_SRC);
         let destination_content = cmp_f(memory_allocator.clone(), (0..64).map(|_| 0).collect(), BufferUsage::TRANSFER_DST);
         let data_buffer = cmp_f(memory_allocator.clone(), (0..65536u32).collect(), BufferUsage::STORAGE_BUFFER);
-        
+
         let command_buffer = Self::build_command_buffer(command_buffer_allocator.clone(), &queue_family_index, &source, &destination_content);
 
         Self {vk_library,
@@ -126,8 +126,8 @@ impl EngineComputing {
                     .iter()
                     .enumerate()
                     .position(|(i, d)| {
-                    d.queue_flags.contains(QueueFlags::GRAPHICS) && device.surface_support(i as u32, &surface).unwrap_or(false)
-                }).map(|i| (device, i as u32))
+                        d.queue_flags.contains(QueueFlags::GRAPHICS) && device.surface_support(i as u32, &surface).unwrap_or(false)
+                    }).map(|i| (device, i as u32))
             }).min_by_key(|(p, _)| {
             match p.properties().device_type {
                 PhysicalDeviceType::DiscreteGpu => 0,
@@ -156,7 +156,7 @@ impl EngineComputing {
 
     fn build_command_buffer(command_buffer_Allocator: Arc<StandardCommandBufferAllocator>, index: &u32, src: &Subbuffer<[u32]>, dst: &Subbuffer<[u32]>) -> Arc<PrimaryAutoCommandBuffer<Arc<StandardCommandBufferAllocator>>> {
         let mut builder = AutoCommandBufferBuilder::primary(&command_buffer_Allocator, *index, CommandBufferUsage::OneTimeSubmit).unwrap();
-        
+
         builder.copy_buffer(CopyBufferInfo::buffers(src.clone(), dst.clone()));
         builder.build().unwrap()
     }
@@ -175,3 +175,4 @@ impl EngineComputing {
         ).unwrap()
     }
 }
+

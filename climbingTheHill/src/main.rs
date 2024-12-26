@@ -19,7 +19,7 @@ use image::{ImageBuffer, Rgba};
 use vulkano::image::view::ImageView;
 
 use crate::e_computing::EngineComputing;
-mod e_computing;
+pub mod e_computing;
 mod cs;
 mod shader_fractal;
 

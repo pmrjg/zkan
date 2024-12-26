@@ -1,0 +1,17 @@
+[package]
+name = "work-from-home"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+climbing-the-hill = {path = "../../../climbingTheHill"}
+vulkano = { workspace = true }
+vulkano-shaders = { workspace = true }
+vulkano-util = { workspace = true }
+vulkano-win = {  workspace = true }
+winit = { workspace = true }
+pub-fields = { workspace = true }
+image = { workspace = true }
+
+[profile.dev]
+opt-level = 1
