@@ -9,7 +9,7 @@ use winit::event_loop::EventLoop;
 use winit::window::{Window};
 
 #[pub_fields]
-struct VkInit {
+pub struct VkInitDevices {
     library: Arc<VulkanLibrary>,
     instance: Arc<Instance>,
     physical_device: Arc<PhysicalDevice>,
@@ -21,8 +21,8 @@ struct VkInit {
     queue: Arc<Queue>,
 }
 
-impl VkInit {
-    fn new() -> Self{
+impl VkInitDevices {
+    fn new() -> VkInitDevices {
         let l = VulkanLibrary::new().expect("Failed to load vulkan library!");
 
         let event_loop = EventLoop::new().unwrap();
@@ -48,7 +48,7 @@ impl VkInit {
         let physical_device = Self::pick_physical_device(instance.clone(), &device_extensions, surface.clone());
         
         let queue_index = Self::get_device_queue_index(&physical_device);
-        let (logical_device, mut queues) = Self::logical_device_and_queues(physical_device.clone(), &queue_index);
+        let (logical_device, mut queues) = Self::logical_device_and_queues(physical_device.clone(), &queue_index, &device_extensions);
         
         let queue = queues.next().expect("Failed to get queue");
 
@@ -59,7 +59,7 @@ impl VkInit {
         let x = instance.enumerate_physical_devices().expect("failed to enumerate physical devices");
         let devices = Vec::from_iter(x);
 
-        devices.iter().filter(|device| device.supported_extensions().contains(device_extensions))
+        devices.iter().filter(|device| device.supported_extensions().contains(&device_extensions))
             .filter_map(|device| {
                 device.queue_family_properties()
                     .iter()
@@ -89,12 +89,13 @@ impl VkInit {
             .expect("no such queue family") as u32
     }
     
-    fn logical_device_and_queues(physical_device: Arc<PhysicalDevice>, index: &u32) -> (Arc<Device>, impl ExactSizeIterator<Item=Arc<Queue>> + Sized) {
+    fn logical_device_and_queues(physical_device: Arc<PhysicalDevice>, index: &u32, extensions: &DeviceExtensions) -> (Arc<Device>, impl ExactSizeIterator<Item=Arc<Queue>> + Sized) {
         Device::new(
             physical_device, DeviceCreateInfo {
                 queue_create_infos: vec![QueueCreateInfo{
                     queue_family_index: *index, ..Default::default()
                 }],
+                enabled_extensions: *extensions,
                 ..Default::default()
             }
         ).expect("failed to create device")
