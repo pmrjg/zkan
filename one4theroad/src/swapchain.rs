@@ -16,7 +16,6 @@ pub struct VkInitSwapchain {
     images: Vec<Arc<Image>>
 }
 
-
 impl VkInitSwapchain {
     pub fn new(devices: init_devices::VkInitDevices ) -> VkInitSwapchain {
         

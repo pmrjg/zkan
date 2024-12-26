@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/vulkan_cpp_tutorial.iml" filepath="$PROJECT_DIR$/.idea/vulkan_cpp_tutorial.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modern_opengl.iml" filepath="$PROJECT_DIR$/.idea/modern_opengl.iml" />
     </modules>
   </component>
 </project>
