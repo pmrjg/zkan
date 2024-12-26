@@ -1,10 +1,20 @@
+use std::sync::Arc;
 use pub_fields::pub_fields;
+use vulkano::format::Format;
 use crate::init_devices;
-use vulkano::image::ImageUsage;
-use vulkano::swapchain::{Swapchain, SwapchainCreateInfo};
+use vulkano::image::{Image, ImageUsage};
+use vulkano::swapchain::{CompositeAlpha, SurfaceCapabilities, Swapchain, SwapchainCreateInfo};
+use winit::dpi::PhysicalSize;
 
 #[pub_fields]
-struct VkInitSwapchain {}
+pub struct VkInitSwapchain {
+    caps: Arc<SurfaceCapabilities>,
+    dimensions: Arc<PhysicalSize<u32>>,
+    composite_alpha: CompositeAlpha,
+    image_format: Format,
+    swapchain: Arc<Swapchain>,
+    images: Vec<Arc<Image>>
+}
 
 
 impl VkInitSwapchain {
@@ -27,6 +37,6 @@ impl VkInitSwapchain {
             ..Default::default()
         }).unwrap();
         
-        VkInitSwapchain {}
+        VkInitSwapchain {caps: Arc::new(caps), dimensions: Arc::new(dimensions), composite_alpha, image_format, swapchain, images}
     }
 }
