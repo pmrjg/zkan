@@ -12,7 +12,7 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 
-find_library(GLFW glfw3)
+find_library(GLFW glfw)
 find_library(DL libdl)
 find_library(PTHREAD pthread)
 
