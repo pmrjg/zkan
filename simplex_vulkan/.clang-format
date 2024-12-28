@@ -1,0 +1,15 @@
+Language: Cpp
+BasedOnStyle: Google
+Standard: Latest
+UseTab: Never
+ColumnLimit: 180
+
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
+
+InsertBraces: true
+ExperimentalAutoDetectBinPacking: true
+SortIncludes: CaseInsensitive
