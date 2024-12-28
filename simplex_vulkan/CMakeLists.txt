@@ -12,7 +12,7 @@ FetchContent_Declare(
         vulkan
         GIT_REPOSITORY "https://github.com/KhronosGroup/Vulkan-Hpp.git"
         GIT_TAG "v1.4.303"
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW FALSE
 )
 
 FetchContent_MakeAvailable(vulkan)
@@ -35,34 +35,33 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glm)
 
-FetchContent_Declare(
-        spirv_headers
+#[[FetchContent_Declare(spirv-headers
         GIT_REPOSITORY "https://github.com/KhronosGroup/SPIRV-Headers.git"
-        GIT_TAG "1.4.2"
-        GIT_SHALLOW TRUE
+        GIT_TAG "main"
 )
-
-FetchContent_MakeAvailable(spirv_headers)
+FetchContent_MakeAvailable(spirv-headers)
 
 ExternalProject_Add(
-        spirv_tools
+        spirv-tools
         GIT_REPOSITORY "https://github.com/KhronosGroup/SPIRV-Tools.git"
         GIT_TAG "v2024.2"
         GIT_SHALLOW FALSE
-        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/spirv-tools
+        BUILD_IN_SOURCE TRUE
+        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/SPIRV-Tools
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
 
 
 ExternalProject_Add(
-        glslangd
+        glsld
         GIT_REPOSITORY "https://github.com/KhronosGroup/glslang.git"
         GIT_TAG "15.1.0"
         GIT_SHALLOW TRUE
         PREFIX ${CMAKE_CURRENT_BINARY_DIR}/glslang
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-        DEPENDS ${SPIRV_TOOLS}
-)
+        DEPENDS ${spirv-tools}
+)]]
 
 FetchContent_Declare(GSL
         GIT_REPOSITORY "https://github.com/microsoft/GSL"
@@ -72,19 +71,15 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
-
-file(GLOB_RECURSE CODE_SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE CODE_HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
-
 add_executable(${PROJECT_NAME} vk/main.cpp
-    ${CODE_SOURCE_FILES} ${CODE_HEADER_FILEs}
         vk/glfw/glfw_initialization.h
         vk/glfw/glfw_initialization.cpp
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-target_link_libraries(${PROJECT_NAME} PRIVATE glm)
-target_link_libraries(${PROJECT_NAME} PRIVATE glslang)
+
+#[[target_link_libraries(${PROJECT_NAME} PUBLIC ${spirv-headers})
+target_link_libraries(${PROJECT_NAME} PUBLIC INTERFACE ${spirv-tools} ${glsld})]]
+target_link_libraries(${PROJECT_NAME} PRIVATE ${vulkan})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${glfw})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${glm})
 target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft.GSL::GSL)
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_26)
