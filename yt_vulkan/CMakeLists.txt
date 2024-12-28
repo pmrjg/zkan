@@ -14,6 +14,8 @@ find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(glslang REQUIRED)
 
+find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
+
 find_library(GLFW glfw)
 find_library(DL libdl)
 find_library(PTHREAD pthread)
