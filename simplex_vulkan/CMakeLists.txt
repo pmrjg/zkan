@@ -78,6 +78,8 @@ file(GLOB_RECURSE CODE_HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DI
 
 add_executable(${PROJECT_NAME} vk/main.cpp
     ${CODE_SOURCE_FILES} ${CODE_HEADER_FILEs}
+        vk/glfw/glfw_initialization.h
+        vk/glfw/glfw_initialization.cpp
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)

@@ -1,48 +1,22 @@
 #include <iostream>
-
-#define GLFW_INCLUDE_VULKAN
+#include <cstdlib>
+#include <cmath>
+#include <gsl/gsl>
+#include <cstdint>
 #include <GLFW/glfw3.h>
 
-#define WIDTH 1920
-#define HEIGHT 1080
+#include "glfw/glfw_initialization.h"
 
-GLFWwindow* window = nullptr;
+std::int32_t main(std::int32_t argc, gsl::zstring* argv) {
 
-void glfw_keycallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-}
+    vkeng::GlfwInitialization _glfw;
 
-int main(int argc, char* argv[]) {
+    gsl::not_null<GLFWwindow*> window = glfwCreateWindow(800, 600, "Vulkan", nullptr, nullptr);
+    gsl::final_action _cleanup_window([window] {glfwDestroyWindow(window);});
 
-    if (!glfwInit()) {
-        return 1;
-    }
-
-    if (!glfwVulkanSupported()) {
-        return 2;
-    }
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-
-
-
-    if (!window) {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-
-    glfwSetKeyCallback(window, glfw_keycallback);
-
-    while (!glfwWindowShouldClose(window)) {
+    while ( ! glfwWindowShouldClose(window) ) {
         glfwPollEvents();
     }
 
-    glfwTerminate();
-
-    return 0;
+    return EXIT_SUCCESS;
 }
