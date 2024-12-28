@@ -78,8 +78,8 @@ add_executable(${PROJECT_NAME} vk/main.cpp
 
 #[[target_link_libraries(${PROJECT_NAME} PUBLIC ${spirv-headers})
 target_link_libraries(${PROJECT_NAME} PUBLIC INTERFACE ${spirv-tools} ${glsld})]]
-target_link_libraries(${PROJECT_NAME} PRIVATE ${vulkan})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${glfw})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${glm})
+target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft.GSL::GSL)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_26)
