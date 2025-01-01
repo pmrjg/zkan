@@ -19,11 +19,11 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Boost)
 
-find_package(Boost 1.87.0 EXACT REQUIRED COMPONENTS filesystem lexical_cast)
+find_package(Boost 1.87.0 EXACT REQUIRED)
 
 
 add_executable(patterns main.cpp
-        src/journal.cpp
+        src/journal.hpp
         src/deps/add_to_project.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
