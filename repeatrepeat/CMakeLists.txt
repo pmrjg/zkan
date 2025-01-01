@@ -39,7 +39,7 @@ FetchContent_MakeAvailable(glm)
 FetchContent_Declare(GSL
         GIT_REPOSITORY "https://github.com/microsoft/GSL"
         GIT_TAG "v4.1.0"
-        GIT_SHALLOW ON
+        GIT_SHALLOW TRUE
 )
 
 FetchContent_MakeAvailable(GSL)
