@@ -23,8 +23,9 @@ find_package(Boost 1.87.0 EXACT REQUIRED)
 
 
 add_executable(patterns main.cpp
-        src/journal.hpp
-        src/deps/add_to_project.h)
+        src/single_responsibility.hpp
+        src/deps/add_to_project.h
+        src/open_closed_principle.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/deps/add_to_project.h")
