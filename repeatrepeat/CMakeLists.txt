@@ -10,13 +10,13 @@ include(FetchContent)
 include(ExternalProject)
 
 FetchContent_Declare(
-        vulkan
+        vk
         GIT_REPOSITORY "https://github.com/KhronosGroup/Vulkan-Hpp.git"
         GIT_TAG "v1.4.303"
         GIT_SHALLOW FALSE
 )
 
-FetchContent_MakeAvailable(vulkan)
+FetchContent_MakeAvailable(vk)
 
 FetchContent_Declare(
         glfw
@@ -44,11 +44,12 @@ FetchContent_Declare(GSL
 
 FetchContent_MakeAvailable(GSL)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp
+        vk/deps/add_to_project.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE vulkan)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft.GSL::GSL)
-target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vk/deps/precomp.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/vk/deps/add_to_project.h")
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_26)
