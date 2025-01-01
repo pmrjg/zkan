@@ -11,5 +11,14 @@
     <mapping directory="$PROJECT_DIR$/build/_deps/vulkan-src/glm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build/_deps/vulkan-src/glslang" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build/_deps/vulkan-src/tinyxml2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/glfw-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/glm-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/gsl-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src/Vulkan-Headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src/glslang" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/vulkan-src/tinyxml2" vcs="Git" />
   </component>
 </project>
