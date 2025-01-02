@@ -9,4 +9,5 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <tuple>
 #include <boost/lexical_cast.hpp>
