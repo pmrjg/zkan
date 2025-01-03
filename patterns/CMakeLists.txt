@@ -32,6 +32,7 @@ add_executable(patterns main.cpp
         src/builders/builder.h
         src/builders/groovy_style.h
         src/factory/point_in_case.h
+        src/factory/hot_drink.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
