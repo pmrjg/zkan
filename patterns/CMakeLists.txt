@@ -23,12 +23,13 @@ find_package(Boost 1.87.0 EXACT REQUIRED)
 
 
 add_executable(patterns main.cpp
-        src/single_responsibility.hpp
+        src/solid_principle/single_responsibility.hpp
         src/deps/add_to_project.h
-        src/open_closed_principle.h
-        src/liskov_substitution_principle.h
-        src/interface_segregation_principle.h
-        src/dependency_inversion.h)
+        src/solid_principle/open_closed_principle.h
+        src/solid_principle/liskov_substitution_principle.h
+        src/solid_principle/interface_segregation_principle.h
+        src/solid_principle/dependency_inversion.h
+        src/builders/builder.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/deps/add_to_project.h")

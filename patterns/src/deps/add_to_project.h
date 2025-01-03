@@ -10,4 +10,5 @@
 #include <vector>
 #include <fstream>
 #include <tuple>
+#include <sstream>
 #include <boost/lexical_cast.hpp>
