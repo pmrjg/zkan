@@ -31,6 +31,7 @@ add_executable(patterns main.cpp
         src/solid_principle/dependency_inversion.h
         src/builders/builder.h
         src/builders/groovy_style.h
+        src/factory/point_in_case.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
