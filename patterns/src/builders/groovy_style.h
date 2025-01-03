@@ -4,6 +4,7 @@
 
 #pragma once
 #include <ostream>
+using namespace std;
 
 struct Tag {
     string name, text;
