@@ -46,4 +46,6 @@ struct HtmlBuilder {
     }
 
     string str() const { return root.str();}
+
+    operator HtmlElement() const { return root; }
 };
