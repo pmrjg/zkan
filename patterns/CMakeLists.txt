@@ -29,7 +29,8 @@ add_executable(patterns main.cpp
         src/solid_principle/liskov_substitution_principle.h
         src/solid_principle/interface_segregation_principle.h
         src/solid_principle/dependency_inversion.h
-        src/builders/builder.h)
+        src/builders/builder.h
+        src/builders/groovy_style.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/deps/add_to_project.h")
