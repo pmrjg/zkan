@@ -40,6 +40,7 @@ add_executable(patterns main.cpp
         src/singleton/dependency_injection.h
         src/singleton/monostate.h
         src/singleton/multiton.h
+        src/structure/adapter/example.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)
