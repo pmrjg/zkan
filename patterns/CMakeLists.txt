@@ -36,6 +36,10 @@ add_executable(patterns main.cpp
         src/prototype/record.h
         src/prototype/employee_factory.h
         src/prototype/serialization.h
+        src/singleton/implementation.h
+        src/singleton/dependency_injection.h
+        src/singleton/monostate.h
+        src/singleton/multiton.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)
