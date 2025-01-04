@@ -33,8 +33,11 @@ add_executable(patterns main.cpp
         src/builders/groovy_style.h
         src/factory/point_in_case.h
         src/factory/hot_drink.h
+        src/prototype/record.h
+        src/prototype/employee_factory.h
+        src/prototype/serialization.h
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast)
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/deps/add_to_project.h")
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_26)
