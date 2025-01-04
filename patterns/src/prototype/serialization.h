@@ -33,6 +33,8 @@ struct Contact {
     string name;
     Address* address;
 
+    explicit Contact(){}
+
     Contact(const string &name, Address* address) : name(name), address(address) {}
 
     //Copy constructor
@@ -49,3 +51,12 @@ struct Contact {
                << "name: " << obj.name
                << " address: " << obj.address;
     }
+private:
+    friend class boost::serialization::access;
+
+    template<class archive>
+    void serialize(archive& ar, const unsigned version) {
+        ar & name;
+        ar & address;
+    }
+};
