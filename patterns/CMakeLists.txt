@@ -44,6 +44,7 @@ add_executable(patterns main.cpp
         src/structure/bridge/pimpl.h
         src/structure/bridge/shrink_wrapped_pimpl.h
         src/structure/bridge/shrink_wrapped_pimpl.cpp
+        src/structure/bridge/bridge.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)
