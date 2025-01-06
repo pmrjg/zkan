@@ -41,6 +41,9 @@ add_executable(patterns main.cpp
         src/singleton/monostate.h
         src/singleton/multiton.h
         src/structure/adapter/example.h
+        src/structure/bridge/pimpl.h
+        src/structure/bridge/shrink_wrapped_pimpl.h
+        src/structure/bridge/shrink_wrapped_pimpl.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)
