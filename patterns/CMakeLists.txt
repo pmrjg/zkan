@@ -47,6 +47,7 @@ add_executable(patterns main.cpp
         src/structure/bridge/bridge.h
         src/structure/composite/example.h
         src/structure/composite/neural_networks.h
+        src/structure/composite/array_backed_properties.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::filesystem Boost::lexical_cast Boost::serialization)

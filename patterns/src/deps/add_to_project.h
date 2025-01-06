@@ -13,3 +13,7 @@
 #include <sstream>
 #include <cmath>
 #include <memory>
+#include <ostream>
+#include <algorithm>
+#include <numeric>
+#include <array>
